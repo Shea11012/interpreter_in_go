@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/Shea11012/interpreter_in_go/ast"
+	"github.com/Shea11012/interpreter_in_go/code"
 	"hash/fnv"
 	"strconv"
 	"strings"
@@ -12,16 +13,18 @@ import (
 type Type string
 
 const (
-	INTEGER_OBJ      = "INTEGER"
-	BOOLEAN_OBJ      = "BOOLEAN"
-	NULL_OBJ         = "NULL"
-	RETURN_VALUE_OBJ = "RETURN_VALUE"
-	ERROR_OBJ        = "ERROR"
-	FUNCTION_OBJ     = "FUNCTION"
-	STRING_OBJ       = "STRING"
-	BUILTIN_OBJ      = "BUILTIN"
-	ARRAY_OBJ        = "ARRAY"
-	HASH_OBJ         = "HASH"
+	INTEGER_OBJ          = "INTEGER"
+	BOOLEAN_OBJ          = "BOOLEAN"
+	NULL_OBJ             = "NULL"
+	RETURN_VALUE_OBJ     = "RETURN_VALUE"
+	ERROR_OBJ            = "ERROR"
+	FUNCTION_OBJ         = "FUNCTION"
+	STRING_OBJ           = "STRING"
+	BUILTIN_OBJ          = "BUILTIN"
+	ARRAY_OBJ            = "ARRAY"
+	HASH_OBJ             = "HASH"
+	COMPILE_FUNCTION_OBJ = "COMPILE_FUNCTION_OBJ"
+	CLOSURE_OBJ          = "CLOSURE"
 )
 
 type Object interface {
@@ -130,6 +133,33 @@ func (f *Function) Inspect() string {
 	out.WriteString("\n}")
 
 	return out.String()
+}
+
+type CompiledFunction struct {
+	Instructions  code.Instructions
+	NumLocals     int
+	NumParameters int
+}
+
+func (c *CompiledFunction) Type() Type {
+	return COMPILE_FUNCTION_OBJ
+}
+
+func (c *CompiledFunction) Inspect() string {
+	return fmt.Sprintf("CompiledFunction[%p]", c)
+}
+
+type Closure struct {
+	Fn   *CompiledFunction
+	Free []Object
+}
+
+func (c *Closure) Type() Type {
+	return CLOSURE_OBJ
+}
+
+func (c *Closure) Inspect() string {
+	return fmt.Sprintf("Closure[%p]", c)
 }
 
 type String struct {

@@ -3,10 +3,12 @@ package repl
 import (
 	"bufio"
 	"fmt"
-	"github.com/Shea11012/interpreter_in_go/evaluator"
+	"github.com/Shea11012/interpreter_in_go/builtin"
+	"github.com/Shea11012/interpreter_in_go/compiler"
 	"github.com/Shea11012/interpreter_in_go/lexer"
 	"github.com/Shea11012/interpreter_in_go/object"
 	"github.com/Shea11012/interpreter_in_go/parser"
+	"github.com/Shea11012/interpreter_in_go/vm"
 	"io"
 )
 
@@ -14,7 +16,14 @@ const PROMPT = ">> "
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
-	env := object.NewEnvironment()
+	constants := []object.Object{}
+	globals := make([]object.Object,vm.GlobalsSize)
+	symbolTable := compiler.NewSymbolTable()
+
+	for i, v := range builtin.BuiltinFns {
+		symbolTable.DefineBuiltin(i,v.Name)
+	}
+
 	for {
 		_, _ = fmt.Fprintf(out, PROMPT)
 		scanned := scanner.Scan()
@@ -32,11 +41,25 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		evaluated := evaluator.Eval(program, env)
-		if evaluated != nil {
-			_, _ = io.WriteString(out, evaluated.Inspect())
-			_, _ = io.WriteString(out, "\n")
+		comp := compiler.NewWithState(symbolTable,constants)
+		err := comp.Compile(program)
+		if err != nil {
+			_, _ = fmt.Fprintf(out, "Woops! Compilation failed:\n %s\n", err)
+			continue
 		}
+
+		code := comp.Bytecode()
+		constants = code.Constants
+		machine := vm.NewWithGlobalsStore(code,globals)
+		err = machine.Run()
+		if err != nil {
+			_, _ = fmt.Fprintf(out, "Woops! Executing bytecode failed:\n %s\n", err)
+			continue
+		}
+
+		stackTop := machine.LastPoppedStackElem()
+		_, _ = io.WriteString(out, stackTop.Inspect())
+		_, _ = io.WriteString(out, "\n")
 	}
 }
 

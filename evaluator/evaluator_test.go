@@ -272,7 +272,7 @@ func TestBuiltinFunctions(t *testing.T) {
 		{`len("four")`, 4},
 		{`len("hello world")`, 11},
 		{`len(1)`, "argument to `len` not supported, got INTEGER"},
-		{`len("one","two")`, "wrong number of arguments got=2,want=1"},
+		{`len("one","two")`, "wrong number of arguments. got=2, want=1"},
 		{`map([1,2,3],fn(x){x * 2})`, "[2, 4, 6]"},
 		{`reduce([1,2,3],0,fn(x,y){x+y})`, 6},
 	}

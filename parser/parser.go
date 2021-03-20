@@ -153,6 +153,10 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	// 解析 = 后面的表达式
 	stmt.Value = p.parseExpression(LOWEST)
 
+	if fl,ok := stmt.Value.(*ast.FunctionLiteral); ok {
+		fl.Name = stmt.Name.Value
+	}
+
 	// 跳过 ;
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()

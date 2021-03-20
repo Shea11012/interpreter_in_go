@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/Shea11012/interpreter_in_go/token"
 	"strings"
 )
@@ -321,6 +322,7 @@ type FunctionLiteral struct {
 	Token      token.Token // fn token
 	Parameters []*Identifier
 	Body       *BlockStatement
+	Name       string
 }
 
 func (f *FunctionLiteral) TokenLiteral() string {
@@ -336,6 +338,9 @@ func (f *FunctionLiteral) String() string {
 	}
 
 	out.WriteString(f.TokenLiteral())
+	if f.Name != "" {
+		out.WriteString(fmt.Sprintf("<%s>",f.Name))
+	}
 	out.WriteString("(")
 	out.WriteString(strings.Join(params, ", "))
 	out.WriteString(") ")

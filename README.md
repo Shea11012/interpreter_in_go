@@ -1,5 +1,8 @@
 # monkey-go
 
+执行流程：
+lexer -> parser -> compiler -> virtual machine
+
 ## 语法
 
 ### features
